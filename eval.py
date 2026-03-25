@@ -14,13 +14,14 @@ from sklearn import preprocessing
 from torchvision.transforms import v2 as transforms
 import stable_worldmodel as swm
 
-def img_transform(cfg):
+
+def img_transform(img_size):
     transform = transforms.Compose(
         [
             transforms.ToImage(),
             transforms.ToDtype(torch.float32, scale=True),
             transforms.Normalize(**spt.data.dataset_stats.ImageNet),
-            transforms.Resize(size=cfg.eval.img_size),
+            transforms.Resize(size=img_size),
         ]
     )
     return transform
@@ -55,12 +56,12 @@ def run(cfg: DictConfig):
 
     # create world environment
     cfg.world.max_episode_steps = 2 * cfg.eval.eval_budget
-    world = swm.World(**cfg.world, image_shape=(224, 224))
+    world = swm.World(**cfg.world, image_shape=(cfg.eval.img_size, cfg.eval.img_size))
 
     # create the transform
     transform = {
-        "pixels": img_transform(cfg),
-        "goal": img_transform(cfg),
+        "pixels": img_transform(cfg.eval.model_img_size),
+        "goal": img_transform(cfg.eval.model_img_size),
     }
 
     dataset = get_dataset(cfg, cfg.eval.dataset_name)
@@ -85,7 +86,7 @@ def run(cfg: DictConfig):
     policy = cfg.get("policy", "random")
 
     if policy != "random":
-        model = swm.policy.AutoCostModel(cfg.policy)
+        model = swm.policy.AutoCostModel(policy)
         model = model.to("cuda")
         model = model.eval()
         model.requires_grad_(False)
@@ -95,7 +96,6 @@ def run(cfg: DictConfig):
         policy = swm.policy.WorldModelPolicy(
             solver=solver, config=config, process=process, transform=transform
         )
-
     else:
         policy = swm.policy.RandomPolicy()
 

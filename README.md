@@ -84,6 +84,14 @@ python eval.py --config-name=pusht.yaml policy=pusht/lewm
 python eval.py --config-name=pusht.yaml policy=pusht/lewm_object.ckpt
 ```
 
+**DINOv2-based models (dinowm):** The `dinowm` model uses a DINOv2-Small backbone (`patch_size=14`) whose predictor has a fixed positional embedding sized for 196 patches (a 14×14 grid). You must set `eval.model_img_size=196` so the backbone receives 196×196 images and produces the expected patch count:
+
+```bash
+python eval.py --config-name=pusht.yaml policy=pusht/dinowm eval.model_img_size=196
+```
+
+Other models (e.g. `lejepa`) are resolution-agnostic and use the default `img_size` (224).
+
 ## Pretrained Checkpoints
 
 Pre-trained checkpoints are available on [Google Drive](https://drive.google.com/drive/folders/1r31os0d4-rR0mdHc7OlY_e5nh3XT4r4e). Download the checkpoint archive and place the extracted files under `$STABLEWM_HOME/`.
