@@ -1,6 +1,16 @@
 import os
+import warnings
 
 os.environ["MUJOCO_GL"] = "egl"
+
+# Suppress Gymnasium non-fatal warnings
+warnings.filterwarnings(
+    "ignore",
+    message=(
+        r".*Casting input x to numpy array"
+    ),
+    category=UserWarning,
+)
 
 import time
 from pathlib import Path
